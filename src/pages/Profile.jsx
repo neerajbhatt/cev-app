@@ -149,17 +149,17 @@ export default function Profile() {
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 2, borderBottom: '2px solid #E2E8F0', marginBottom: 24 }}>
-        {TABS.map(t => (
-          <button key={t} onClick={() => setActiveTab(t)} style={{
+        {TABS.map(tb => (
+          <button key={tb} onClick={() => setActiveTab(tb)} style={{
             padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer',
             fontSize: 13, fontWeight: 600, textTransform: 'capitalize',
-            color: activeTab === t ? '#002677' : '#94a3b8',
-            borderBottom: activeTab === t ? '2px solid #002677' : '2px solid transparent',
+            color: activeTab === tb ? '#002677' : '#94a3b8',
+            borderBottom: activeTab === tb ? '2px solid #002677' : '2px solid transparent',
             marginBottom: -2,
           }}>{
-            tab === 'profile' ? t('profile.tab.profile') :
-            tab === 'delegation' ? t('profile.tab.delegation') :
-            tab === 'security' ? t('profile.tab.security') :
+            tb === 'profile' ? t('profile.tab.profile') :
+            tb === 'delegation' ? t('profile.tab.delegation') :
+            tb === 'security' ? t('profile.tab.security') :
             t('profile.tab.language')
           }</button>
         ))}
