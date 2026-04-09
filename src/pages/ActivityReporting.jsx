@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
+import { useI18n } from '../i18n'
 
 const ACTIVITY_TYPES = ['Employment', 'Self-Employment', 'Vocational Training', 'Education', 'Volunteering', 'Job Search', 'Workforce Program', 'SNAP/TANF Work Program']
 const MONTHS_OPEN = ['Mar 2026']
@@ -14,6 +15,7 @@ const STATUS_STYLE = {
 
 export default function ActivityReporting() {
   const { compliance, activities, addActivity, deleteActivity } = useApp()
+  const { t } = useI18n()
   const [selectedMonth, setSelectedMonth] = useState('Mar 2026')
   const [showForm, setShowForm] = useState(false)
   const [showExemption, setShowExemption] = useState(false)
@@ -32,12 +34,12 @@ export default function ActivityReporting() {
 
   const validate = () => {
     const e = {}
-    if (!form.type) e.type = 'Activity type is required'
-    if (!form.hours || isNaN(form.hours) || Number(form.hours) <= 0) e.hours = 'Enter valid hours'
-    if (Number(form.hours) > 744) e.hours = 'Hours cannot exceed 744 per month'
-    if (!form.startDate) e.startDate = 'Start date is required'
-    if (!form.endDate) e.endDate = 'End date is required'
-    if (form.startDate && form.endDate && form.endDate < form.startDate) e.endDate = 'End date must be after start date'
+    if (!form.type) e.type = t('act.typeRequired')
+    if (!form.hours || isNaN(form.hours) || Number(form.hours) <= 0) e.hours = t('act.validHours')
+    if (Number(form.hours) > 744) e.hours = t('act.maxHours')
+    if (!form.startDate) e.startDate = t('act.startRequired')
+    if (!form.endDate) e.endDate = t('act.endRequired')
+    if (form.startDate && form.endDate && form.endDate < form.startDate) e.endDate = t('act.endAfterStart')
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -56,9 +58,9 @@ export default function ActivityReporting() {
   return (
     <div style={{ padding: '28px 32px', maxWidth: 900 }}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#002677' }}>Activity Reporting</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#002677' }}>{t('act.title')}</h1>
         <p style={{ color: '#64748b', fontSize: 14, marginTop: 4 }}>
-          Report your monthly work, training, and other qualifying activities to meet your CE requirements.
+          {t('act.desc')}
         </p>
       </div>
 
@@ -87,11 +89,11 @@ export default function ActivityReporting() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div>
             <h2 style={{ fontSize: 16, fontWeight: 700, color: '#002677' }}>{selectedMonth}</h2>
-            <p style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>{totalHours} of {required} required hours reported</p>
+            <p style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>{totalHours} {t('act.ofRequired', required)}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 28, fontWeight: 800, color: progress >= 100 ? '#22C55E' : '#FF6900' }}>{progress}%</div>
-            <div style={{ fontSize: 12, color: '#94a3b8' }}>complete</div>
+            <div style={{ fontSize: 12, color: '#94a3b8' }}>{t('act.complete')}</div>
           </div>
         </div>
         <div style={{ background: '#F1F5F9', borderRadius: 8, height: 10, overflow: 'hidden', marginBottom: 8 }}>
@@ -107,7 +109,7 @@ export default function ActivityReporting() {
       {/* Success toast */}
       {submitted && (
         <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '12px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10, color: '#166534', fontWeight: 600, fontSize: 14 }}>
-          ✅ Activity added successfully!
+          {t('act.success')}
         </div>
       )}
 
@@ -117,55 +119,55 @@ export default function ActivityReporting() {
           <button onClick={() => { setShowForm(!showForm); setShowExemption(false) }} style={{
             padding: '9px 20px', background: '#002677', color: '#fff', border: 'none',
             borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-          }}>+ Add Activity</button>
+          }}>{t('act.addActivity')}</button>
           <button onClick={() => { setShowExemption(!showExemption); setShowForm(false) }} style={{
             padding: '9px 20px', background: '#fff', color: '#7C3AED', border: '1.5px solid #7C3AED',
             borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-          }}>🛡️ Declare Exemption</button>
+          }}>{t('act.declareExemption')}</button>
           <button style={{
             padding: '9px 20px', background: '#fff', color: '#0891B2', border: '1.5px solid #0891B2',
             borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-          }}>⚡ Report Hardship</button>
+          }}>{t('act.reportHardship')}</button>
         </div>
       )}
 
       {/* Add Activity Form */}
       {showForm && (
         <div style={{ background: '#fff', borderRadius: 12, padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)', marginBottom: 20, border: '1.5px solid #BFDBFE' }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 16 }}>Add Activity — {selectedMonth}</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 16 }}>{t('act.addActivityTitle')} — {selectedMonth}</h3>
           <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-              <FormField label="Activity Type *" error={errors.type}>
+              <FormField label={t('act.activityType')} error={errors.type}>
                 <select value={form.type} onChange={e => set('type', e.target.value)} style={inputStyle}>
-                  <option value="">Select type...</option>
-                  {ACTIVITY_TYPES.map(t => <option key={t}>{t}</option>)}
+                  <option value="">{t('act.selectType')}</option>
+                  {ACTIVITY_TYPES.map(tp => <option key={tp}>{tp}</option>)}
                 </select>
               </FormField>
-              <FormField label="Employer / Organization" error={errors.employer}>
+              <FormField label={t('act.employer')} error={errors.employer}>
                 <input style={inputStyle} value={form.employer} onChange={e => set('employer', e.target.value)} placeholder="e.g. City Market, Community College" />
               </FormField>
-              <FormField label="Hours Completed *" error={errors.hours}>
+              <FormField label={t('act.hours')} error={errors.hours}>
                 <input style={inputStyle} type="number" min="0.5" max="744" step="0.5" value={form.hours} onChange={e => set('hours', e.target.value)} placeholder="e.g. 40" />
               </FormField>
               <div />
-              <FormField label="Start Date *" error={errors.startDate}>
+              <FormField label={t('act.startDate')} error={errors.startDate}>
                 <input style={inputStyle} type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} />
               </FormField>
-              <FormField label="End Date *" error={errors.endDate}>
+              <FormField label={t('act.endDate')} error={errors.endDate}>
                 <input style={inputStyle} type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} />
               </FormField>
               <div style={{ gridColumn: '1 / -1' }}>
-                <FormField label="Notes (optional)">
+                <FormField label={t('act.notes')}>
                   <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 60 }} value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Any additional details..." />
                 </FormField>
               </div>
             </div>
             <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 14, background: '#F8FAFC', padding: '8px 12px', borderRadius: 6 }}>
-              ℹ️ Hours will be validated against your program's 80-hour monthly requirement. Total cannot exceed 744 hours/month.
+              {t('act.hoursInfo')}
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button type="submit" style={{ padding: '9px 24px', background: '#002677', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Save Activity</button>
-              <button type="button" onClick={() => setShowForm(false)} style={{ padding: '9px 16px', background: '#fff', color: '#64748b', border: '1.5px solid #e2e8f0', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+              <button type="submit" style={{ padding: '9px 24px', background: '#002677', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>{t('act.save')}</button>
+              <button type="button" onClick={() => setShowForm(false)} style={{ padding: '9px 16px', background: '#fff', color: '#64748b', border: '1.5px solid #e2e8f0', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>{t('act.cancel')}</button>
             </div>
           </form>
         </div>
@@ -174,30 +176,30 @@ export default function ActivityReporting() {
       {/* Exemption panel */}
       {showExemption && (
         <div style={{ background: '#FAF5FF', border: '1.5px solid #DDD6FE', borderRadius: 12, padding: '20px 24px', marginBottom: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#6D28D9', marginBottom: 12 }}>🛡️ Declare Exemption</h3>
-          <p style={{ fontSize: 13, color: '#64748b', marginBottom: 14 }}>If you qualify for an exemption this month, select the category below. Approved exemptions automatically satisfy your CE requirement.</p>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#6D28D9', marginBottom: 12 }}>{t('act.exemptionTitle')}</h3>
+          <p style={{ fontSize: 13, color: '#64748b', marginBottom: 14 }}>{t('act.exemptionDesc')}</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {['Medical / Disability', 'Caregiver', 'Student (Full-time)', 'Tribal Member', 'Pregnant / Postpartum', 'Domestic Violence'].map(ex => (
+            {[t('exempt.medical'), t('exempt.caregiver'), t('exempt.student'), t('exempt.tribal'), t('exempt.pregnant'), t('exempt.domestic')].map(ex => (
               <button key={ex} style={{ padding: '10px 14px', background: '#fff', border: '1.5px solid #DDD6FE', borderRadius: 8, fontSize: 13, color: '#6D28D9', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}>
                 + {ex}
               </button>
             ))}
           </div>
-          <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 12 }}>Supporting documentation may be required. Upload via the Documents section.</p>
+          <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 12 }}>{t('act.exemptionNote')}</p>
         </div>
       )}
 
       {/* Activities list */}
       <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
         <div style={{ padding: '16px 24px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#002677' }}>Activities — {selectedMonth}</h3>
-          <span style={{ fontSize: 13, color: '#64748b' }}>{monthActivities.length} activities · {totalHours} total hours</span>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#002677' }}>{t('act.activities')} — {selectedMonth}</h3>
+          <span style={{ fontSize: 13, color: '#64748b' }}>{monthActivities.length} {t('act.totalHours', totalHours)}</span>
         </div>
         {monthActivities.length === 0 ? (
           <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
             <div style={{ fontSize: 36, marginBottom: 10 }}>📋</div>
-            <p style={{ fontWeight: 600 }}>No activities reported yet</p>
-            {isOpen && <p style={{ fontSize: 13, marginTop: 4 }}>Click "Add Activity" to get started.</p>}
+            <p style={{ fontWeight: 600 }}>{t('act.noActivities')}</p>
+            {isOpen && <p style={{ fontSize: 13, marginTop: 4 }}>{t('act.getStarted')}</p>}
           </div>
         ) : (
           monthActivities.map(act => (
@@ -212,11 +214,11 @@ export default function ActivityReporting() {
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: 16, fontWeight: 700, color: '#002677' }}>{act.hours}h</div>
                 <span style={{ fontSize: 11, background: act.verified ? '#F0FDF4' : '#FFFBEB', color: act.verified ? '#166534' : '#92400E', border: `1px solid ${act.verified ? '#BBF7D0' : '#FDE68A'}`, borderRadius: 10, padding: '1px 8px', fontWeight: 600 }}>
-                  {act.verified ? '✓ Verified' : 'Pending'}
+                  {act.verified ? `✓ ${t('act.verified')}` : t('act.pending')}
                 </span>
               </div>
               {isOpen && (
-                <button onClick={() => deleteActivity(act.id)} style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>Remove</button>
+                <button onClick={() => deleteActivity(act.id)} style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>{t('act.remove')}</button>
               )}
             </div>
           ))
@@ -236,7 +238,7 @@ function FormField({ label, children, error }) {
     <div>
       <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 5 }}>{label}</label>
       {children}
-      {error && <div style={{ fontSize: 11, color: '#DC2626', marginTop: 3 }}>⚠ {error}</div>}
+      {error && <div style={{ fontSize: 11, color: '#DC2626', marginTop: 3 }}>{error}</div>}
     </div>
   )
 }

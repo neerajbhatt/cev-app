@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
+import { I18nProvider } from './i18n'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import ActivityReporting from './pages/ActivityReporting'
@@ -40,8 +41,10 @@ function Portal() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <Portal />
-    </AppProvider>
+    <I18nProvider>
+      <AppProvider>
+        <Portal />
+      </AppProvider>
+    </I18nProvider>
   )
 }

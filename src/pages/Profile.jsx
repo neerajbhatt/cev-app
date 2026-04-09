@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
+import { useI18n } from '../i18n'
 import { api } from '../api'
 
 export default function Profile() {
   const { user, delegates, addDelegate, removeDelegate } = useApp()
+  const { t, setLang } = useI18n()
   const [activeTab, setActiveTab] = useState('profile')
   const [showDelegateForm, setShowDelegateForm] = useState(false)
   const [delegateForm, setDelegateForm] = useState({ name: '', relation: '', email: '', permissions: [] })
@@ -122,6 +124,7 @@ export default function Profile() {
 
   const handleLangSelect = async (code) => {
     setSelectedLang(code)
+    setLang(code)
     try {
       await api.updateProfile({ language: code })
       setLangSaved(true)
@@ -140,8 +143,8 @@ export default function Profile() {
   return (
     <div style={{ padding: '28px 32px', maxWidth: 800 }}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#002677' }}>My Account</h1>
-        <p style={{ color: '#64748b', fontSize: 14, marginTop: 4 }}>Manage your profile, delegation settings, and security preferences.</p>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#002677' }}>{t('profile.title')}</h1>
+        <p style={{ color: '#64748b', fontSize: 14, marginTop: 4 }}>{t('profile.desc')}</p>
       </div>
 
       {/* Tabs */}
@@ -153,7 +156,12 @@ export default function Profile() {
             color: activeTab === t ? '#002677' : '#94a3b8',
             borderBottom: activeTab === t ? '2px solid #002677' : '2px solid transparent',
             marginBottom: -2,
-          }}>{t === 'delegation' ? 'Authorized Representatives' : t.charAt(0).toUpperCase() + t.slice(1)}</button>
+          }}>{
+            tab === 'profile' ? t('profile.tab.profile') :
+            tab === 'delegation' ? t('profile.tab.delegation') :
+            tab === 'security' ? t('profile.tab.security') :
+            t('profile.tab.language')
+          }</button>
         ))}
       </div>
 
@@ -174,13 +182,13 @@ export default function Profile() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <Field label="First Name" value={profileForm.firstName} onChange={v => setProfileForm(f => ({ ...f, firstName: v }))} />
-            <Field label="Last Name" value={profileForm.lastName} onChange={v => setProfileForm(f => ({ ...f, lastName: v }))} />
-            <Field label="Email Address" value={user.email} type="email" disabled />
-            <Field label="Mobile Phone" value={profileForm.phone} type="tel" onChange={v => setProfileForm(f => ({ ...f, phone: v }))} />
-            <Field label="Date of Birth" value={profileForm.dob} type="date" onChange={v => setProfileForm(f => ({ ...f, dob: v }))} />
+            <Field label={t('profile.firstName')} value={profileForm.firstName} onChange={v => setProfileForm(f => ({ ...f, firstName: v }))} />
+            <Field label={t('profile.lastName')} value={profileForm.lastName} onChange={v => setProfileForm(f => ({ ...f, lastName: v }))} />
+            <Field label={t('profile.email')} value={user.email} type="email" disabled />
+            <Field label={t('profile.phone')} value={profileForm.phone} type="tel" onChange={v => setProfileForm(f => ({ ...f, phone: v }))} />
+            <Field label={t('profile.dob')} value={profileForm.dob} type="date" onChange={v => setProfileForm(f => ({ ...f, dob: v }))} />
             <div>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 5 }}>Preferred Language</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 5 }}>{t('profile.language')}</label>
               <select value={profileForm.language} onChange={e => setProfileForm(f => ({ ...f, language: e.target.value }))} style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: 8, fontSize: 14 }}>
                 <option value="en">English</option>
                 <option value="es">Español</option>
@@ -192,10 +200,10 @@ export default function Profile() {
             </div>
           </div>
 
-          {saved && <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '10px 16px', fontSize: 13, color: '#166534', fontWeight: 600, marginTop: 16 }}>Profile updated successfully!</div>}
+          {saved && <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '10px 16px', fontSize: 13, color: '#166534', fontWeight: 600, marginTop: 16 }}>{t('profile.saved')}</div>}
 
           <button onClick={handleSave} style={{ marginTop: 20, padding: '10px 28px', background: '#002677', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
-            Save Changes
+            {t('profile.saveChanges')}
           </button>
         </div>
       )}
@@ -269,15 +277,15 @@ export default function Profile() {
       {/* Security tab */}
       {activeTab === 'security' && (
         <div style={{ background: '#fff', borderRadius: 12, padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 20 }}>Security Settings</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 20 }}>{t('profile.securityTitle')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <SecurityItem title="Password" desc={passwordAge != null ? `Last changed ${passwordAge} days ago` : 'Never changed'} action="Change Password" onClick={() => openModal('password')} />
-            <SecurityItem title="Multi-Factor Authentication (MFA)" desc={user?.mfa_enabled ? `SMS verification enabled · ${user.mfa_phone || ''}` : 'Not enabled'} action="Manage MFA" onClick={() => openModal('mfa')} status={user?.mfa_enabled ? 'Enabled' : 'Disabled'} statusColor={user?.mfa_enabled ? undefined : '#DC2626'} />
-            <SecurityItem title="Login History" desc="View recent login attempts" action="View History" onClick={() => openModal('history')} />
-            <SecurityItem title="Active Sessions" desc="Manage your active sessions" action="View Sessions" onClick={() => openModal('sessions')} />
+            <SecurityItem title={t('profile.password')} desc={passwordAge != null ? t('profile.lastChanged', passwordAge) : t('profile.neverChanged')} action={t('profile.changePassword')} onClick={() => openModal('password')} />
+            <SecurityItem title={t('profile.mfa')} desc={user?.mfa_enabled ? `${t('profile.mfaEnabled')} · ${user.mfa_phone || ''}` : t('profile.mfaNotEnabled')} action={t('profile.manageMfa')} onClick={() => openModal('mfa')} status={user?.mfa_enabled ? t('profile.enabled') : t('profile.disabled')} statusColor={user?.mfa_enabled ? undefined : '#DC2626'} />
+            <SecurityItem title={t('profile.loginHistory')} desc={t('profile.viewRecentLogins')} action={t('profile.viewHistory')} onClick={() => openModal('history')} />
+            <SecurityItem title={t('profile.activeSessions')} desc={t('profile.manageSessions')} action={t('profile.viewSessions')} onClick={() => openModal('sessions')} />
           </div>
           <div style={{ marginTop: 24, background: '#F8FAFC', borderRadius: 8, padding: '14px 18px', fontSize: 12, color: '#64748b' }}>
-            This portal is protected under HIPAA, MARS-E, IRS 1075, and NIST 800-63 standards. All login activity is logged and may be audited.
+            {t('profile.securityFooter')}
           </div>
         </div>
       )}
@@ -285,8 +293,8 @@ export default function Profile() {
       {/* Language tab */}
       {activeTab === 'language' && (
         <div style={{ background: '#fff', borderRadius: 12, padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 8 }}>Language Preference</h2>
-          <p style={{ fontSize: 13, color: '#64748b', marginBottom: 20 }}>Select your preferred language. All portal content, notifications, and instructions will be displayed in your selected language.</p>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 8 }}>{t('profile.langTitle')}</h2>
+          <p style={{ fontSize: 13, color: '#64748b', marginBottom: 20 }}>{t('profile.langDesc')}</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {[['en', 'English'], ['es', 'Español'], ['zh', '中文 (Chinese)'], ['vi', 'Tiếng Việt'], ['ar', 'العربية (Arabic)'], ['fr', 'Français']].map(([code, label]) => (
               <button key={code} onClick={() => handleLangSelect(code)} style={{
@@ -299,8 +307,8 @@ export default function Profile() {
               </button>
             ))}
           </div>
-          {langSaved && <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '10px 16px', fontSize: 13, color: '#166534', fontWeight: 600, marginTop: 16 }}>Language preference saved!</div>}
-          <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 16 }}>Content is provided through state-configured translation files. Machine translation is not used.</p>
+          {langSaved && <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '10px 16px', fontSize: 13, color: '#166534', fontWeight: 600, marginTop: 16 }}>{t('profile.langSaved')}</div>}
+          <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 16 }}>{t('profile.langNote')}</p>
         </div>
       )}
 

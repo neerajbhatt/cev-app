@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
+import { useI18n } from '../i18n'
 
 export default function Login() {
   const { login, register } = useApp()
+  const { t } = useI18n()
   const [tab, setTab] = useState('login')
   const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '', dob: '', ssn: '', phone: '' })
   const [error, setError] = useState('')
@@ -13,13 +15,13 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    if (!form.email || !form.password) { setError('Please enter your email and password.'); return }
+    if (!form.email || !form.password) { setError(t('login.emailRequired')); return }
     setError('')
     setLoading(true)
     try {
       await login(form.email, form.password)
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.')
+      setError(err.message || t('login.loginFailed'))
     } finally {
       setLoading(false)
     }
@@ -28,16 +30,16 @@ export default function Login() {
   const handleRegister = async (e) => {
     e.preventDefault()
     if (step === 1) {
-      if (!form.firstName || !form.lastName || !form.dob) { setError('Please fill in all required fields.'); return }
+      if (!form.firstName || !form.lastName || !form.dob) { setError(t('login.fieldsRequired')); return }
       setError(''); setStep(2)
     } else {
-      if (!form.email || !form.password || !form.phone) { setError('Please fill in all required fields.'); return }
+      if (!form.email || !form.password || !form.phone) { setError(t('login.fieldsRequired')); return }
       setError('')
       setLoading(true)
       try {
         await register({ firstName: form.firstName, lastName: form.lastName, dob: form.dob, email: form.email, password: form.password, phone: form.phone })
       } catch (err) {
-        setError(err.message || 'Registration failed. Please try again.')
+        setError(err.message || t('login.registerFailed'))
       } finally {
         setLoading(false)
       }
@@ -60,20 +62,20 @@ export default function Login() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 32, margin: '0 auto 12px', boxShadow: '0 4px 16px rgba(255,105,0,0.4)'
           }}>🏛️</div>
-          <h1 style={{ color: '#fff', fontSize: 24, fontWeight: 700, margin: 0 }}>State Benefits Portal</h1>
-          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 14, marginTop: 4 }}>Continuous Eligibility Verification</p>
+          <h1 style={{ color: '#fff', fontSize: 24, fontWeight: 700, margin: 0 }}>{t('login.title')}</h1>
+          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 14, marginTop: 4 }}>{t('login.subtitle')}</p>
         </div>
 
         <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.2)', overflow: 'hidden' }}>
           <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0' }}>
-            {['login', 'register'].map(t => (
-              <button key={t} onClick={() => { setTab(t); setStep(1); setError('') }} style={{
+            {['login', 'register'].map(tb => (
+              <button key={tb} onClick={() => { setTab(tb); setStep(1); setError('') }} style={{
                 flex: 1, padding: '14px 0', border: 'none', background: 'none', cursor: 'pointer',
                 fontSize: 14, fontWeight: 600,
-                color: tab === t ? '#002677' : '#94a3b8',
-                borderBottom: tab === t ? '2px solid #002677' : '2px solid transparent',
+                color: tab === tb ? '#002677' : '#94a3b8',
+                borderBottom: tab === tb ? '2px solid #002677' : '2px solid transparent',
                 transition: 'all 0.2s',
-              }}>{t === 'login' ? 'Sign In' : 'Create Account'}</button>
+              }}>{tb === 'login' ? t('login.signIn') : t('login.createAccount')}</button>
             ))}
           </div>
 
@@ -81,17 +83,17 @@ export default function Login() {
             {tab === 'login' ? (
               <form onSubmit={handleLogin}>
                 <p style={{ fontSize: 13, color: '#64748b', marginBottom: 20 }}>
-                  Sign in with your registered email and password to access your benefits portal.
+                  {t('login.signInDesc')}
                 </p>
-                <Field label="Email Address" type="email" value={form.email} onChange={v => set('email', v)} placeholder="you@email.com" />
-                <Field label="Password" type="password" value={form.password} onChange={v => set('password', v)} placeholder="••••••••" />
+                <Field label={t('login.email')} type="email" value={form.email} onChange={v => set('email', v)} placeholder="you@email.com" />
+                <Field label={t('login.password')} type="password" value={form.password} onChange={v => set('password', v)} placeholder="••••••••" />
                 <div style={{ textAlign: 'right', marginTop: -8, marginBottom: 16 }}>
-                  <a href="#" style={{ fontSize: 12, color: '#196ECF', textDecoration: 'none' }}>Forgot password?</a>
+                  <a href="#" style={{ fontSize: 12, color: '#196ECF', textDecoration: 'none' }}>{t('login.forgotPassword')}</a>
                 </div>
                 {error && <ErrorMsg msg={error} />}
-                <SubmitBtn label={loading ? 'Signing in…' : 'Sign In'} disabled={loading} />
+                <SubmitBtn label={loading ? t('login.signingIn') : t('login.signIn')} disabled={loading} />
                 <p style={{ textAlign: 'center', fontSize: 12, color: '#94a3b8', marginTop: 16 }}>
-                  Demo: demo@cev.gov / demo1234
+                  {t('login.demo')}
                 </p>
               </form>
             ) : (
@@ -101,30 +103,30 @@ export default function Login() {
                     <div key={s} style={{ flex: 1, height: 4, borderRadius: 2, background: step >= s ? '#002677' : '#e2e8f0', transition: 'background 0.3s' }} />
                   ))}
                 </div>
-                <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 16 }}>Step {step} of 2: {step === 1 ? 'Personal Information' : 'Account Setup'}</p>
+                <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 16 }}>{t('login.step')} {step} {t('login.of')} 2: {step === 1 ? t('login.personalInfo') : t('login.accountSetup')}</p>
 
                 {step === 1 ? (<>
                   <div style={{ display: 'flex', gap: 10 }}>
-                    <Field label="First Name" value={form.firstName} onChange={v => set('firstName', v)} placeholder="First" />
-                    <Field label="Last Name" value={form.lastName} onChange={v => set('lastName', v)} placeholder="Last" />
+                    <Field label={t('login.firstName')} value={form.firstName} onChange={v => set('firstName', v)} placeholder="First" />
+                    <Field label={t('login.lastName')} value={form.lastName} onChange={v => set('lastName', v)} placeholder="Last" />
                   </div>
-                  <Field label="Date of Birth" type="date" value={form.dob} onChange={v => set('dob', v)} />
-                  <Field label="SSN (last 4)" value={form.ssn} onChange={v => set('ssn', v)} placeholder="####" maxLength={4} />
+                  <Field label={t('login.dob')} type="date" value={form.dob} onChange={v => set('dob', v)} />
+                  <Field label={t('login.ssn')} value={form.ssn} onChange={v => set('ssn', v)} placeholder="####" maxLength={4} />
                 </>) : (<>
-                  <Field label="Email Address" type="email" value={form.email} onChange={v => set('email', v)} placeholder="you@email.com" />
-                  <Field label="Mobile Phone" type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder="(555) 000-0000" />
-                  <Field label="Create Password" type="password" value={form.password} onChange={v => set('password', v)} placeholder="Min. 8 characters" />
+                  <Field label={t('login.email')} type="email" value={form.email} onChange={v => set('email', v)} placeholder="you@email.com" />
+                  <Field label={t('login.phone')} type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder="(555) 000-0000" />
+                  <Field label={t('login.createPassword')} type="password" value={form.password} onChange={v => set('password', v)} placeholder="Min. 8 characters" />
                 </>)}
 
                 {error && <ErrorMsg msg={error} />}
-                <SubmitBtn label={loading ? 'Creating account…' : step === 1 ? 'Continue →' : 'Create Account'} disabled={loading} />
+                <SubmitBtn label={loading ? t('login.creatingAccount') : step === 1 ? t('login.continue') : t('login.createAccount')} disabled={loading} />
               </form>
             )}
           </div>
         </div>
 
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 20 }}>
-          Protected by HIPAA · MARS-E · NIST 800-63
+          {t('login.protected')}
         </p>
       </div>
     </div>

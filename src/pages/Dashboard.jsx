@@ -1,4 +1,5 @@
 import { useApp } from '../context/AppContext'
+import { useI18n } from '../i18n'
 
 const STATUS_STYLE = {
   'Compliant (Verified)':    { bg: '#F0FDF4', color: '#166534', border: '#BBF7D0', dot: '#22C55E' },
@@ -11,6 +12,7 @@ const STATUS_STYLE = {
 
 export default function Dashboard({ setPage }) {
   const { user, compliance, notifications, documents, activities } = useApp()
+  const { t } = useI18n()
 
   const currentMonth = compliance.find(c => !c.locked) || compliance[compliance.length - 1]
   const pendingActions = notifications.filter(n => n.type === 'action' && !n.read)
@@ -20,15 +22,15 @@ export default function Dashboard({ setPage }) {
   const hoursNeeded = Math.max(0, (currentMonth?.required || 80) - totalHours)
   const progress = Math.min(100, Math.round((totalHours / (currentMonth?.required || 80)) * 100))
 
-  if (!currentMonth) return <div style={{ padding: 40, color: '#64748b' }}>Loading dashboard…</div>
+  if (!currentMonth) return <div style={{ padding: 40, color: '#64748b' }}>{t('dash.loading')}</div>
 
   return (
     <div style={{ padding: '28px 32px', maxWidth: 1100 }}>
       {/* Welcome */}
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#002677' }}>Welcome back, {user.name.split(' ')[0]} 👋</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#002677' }}>{t('dash.welcome')} {user.name.split(' ')[0]} 👋</h1>
         <p style={{ color: '#64748b', fontSize: 14, marginTop: 4 }}>
-          Member ID: {user.id} · Programs: {user.programs.join(', ')} · Reporting Window: Open until April 10, 2026
+          {t('dash.memberId')}: {user.id} · {t('dash.programs')}: {user.programs.join(', ')} · {t('dash.reportingWindow')}
         </p>
       </div>
 
@@ -47,24 +49,24 @@ export default function Dashboard({ setPage }) {
           <button onClick={() => setPage('activity')} style={{
             background: '#FF6900', color: '#fff', border: 'none', borderRadius: 8,
             padding: '8px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
-          }}>Report Now →</button>
+          }}>{t('dash.reportNow')}</button>
         </div>
       )}
 
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
-        <StatCard icon="⏱️" label="Hours This Month" value={`${totalHours} / ${currentMonth.required}`} sub={`${hoursNeeded > 0 ? hoursNeeded + ' more needed' : 'Requirement met!'}`} color={hoursNeeded === 0 ? '#22C55E' : '#FF6900'} onClick={() => setPage('activity')} />
-        <StatCard icon="📄" label="Pending Documents" value={processingDocs.length} sub="Being reviewed" color="#3B82F6" onClick={() => setPage('documents')} />
-        <StatCard icon="🔔" label="Unread Alerts" value={pendingActions.length} sub="Require action" color="#EF4444" onClick={() => setPage('notifications')} />
-        <StatCard icon="📋" label="Activities Logged" value={currentActivities.length} sub={`for ${currentMonth.month}`} color="#8B5CF6" onClick={() => setPage('activity')} />
+        <StatCard icon="⏱️" label={t('dash.hoursThisMonth')} value={`${totalHours} / ${currentMonth.required}`} sub={hoursNeeded > 0 ? `${hoursNeeded} ${t('dash.moreNeeded')}` : t('dash.requirementMet')} color={hoursNeeded === 0 ? '#22C55E' : '#FF6900'} onClick={() => setPage('activity')} />
+        <StatCard icon="📄" label={t('dash.pendingDocs')} value={processingDocs.length} sub={t('dash.beingReviewed')} color="#3B82F6" onClick={() => setPage('documents')} />
+        <StatCard icon="🔔" label={t('dash.unreadAlerts')} value={pendingActions.length} sub={t('dash.requireAction')} color="#EF4444" onClick={() => setPage('notifications')} />
+        <StatCard icon="📋" label={t('dash.activitiesLogged')} value={currentActivities.length} sub={`${t('dash.for')} ${currentMonth.month}`} color="#8B5CF6" onClick={() => setPage('activity')} />
       </div>
 
       {/* Current month progress */}
       <div style={{ background: '#fff', borderRadius: 12, padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)', marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
           <div>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: '#002677' }}>March 2026 — Current Reporting Month</h2>
-            <p style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>Reporting window closes April 10, 2026</p>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: '#002677' }}>{t('dash.currentMonth')}</h2>
+            <p style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>{t('dash.windowCloses')}</p>
           </div>
           <StatusBadge status={currentMonth.status} />
         </div>
@@ -72,20 +74,19 @@ export default function Dashboard({ setPage }) {
           <div style={{ width: `${progress}%`, height: '100%', background: progress >= 100 ? '#22C55E' : '#FF6900', borderRadius: 8, transition: 'width 0.5s' }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#64748b' }}>
-          <span>{totalHours} hours reported</span>
-          <span>{progress}% of {currentMonth.required} required</span>
+          <span>{totalHours} {t('dash.hoursReported')}</span>
+          <span>{progress}% {t('dash.ofRequired')} {currentMonth.required} {t('dash.required')}</span>
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-          <ActionBtn label="+ Add Activity" onClick={() => setPage('activity')} primary />
-          <ActionBtn label="Upload Document" onClick={() => setPage('documents')} />
+          <ActionBtn label={t('dash.addActivity')} onClick={() => setPage('activity')} primary />
+          <ActionBtn label={t('dash.uploadDocument')} onClick={() => setPage('documents')} />
         </div>
       </div>
 
       {/* Compliance history + Required docs */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
-        {/* 6-month compliance */}
         <div style={{ background: '#fff', borderRadius: 12, padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 16 }}>6-Month Compliance History</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 16 }}>{t('dash.complianceHistory')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {compliance.map(c => {
               const s = STATUS_STYLE[c.status] || STATUS_STYLE['Pending Member Action']
@@ -101,23 +102,22 @@ export default function Dashboard({ setPage }) {
           </div>
         </div>
 
-        {/* Required actions */}
         <div style={{ background: '#fff', borderRadius: 12, padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 16 }}>Required Actions</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 16 }}>{t('dash.requiredActions')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <ActionItem icon="⏱️" text={`Report ${hoursNeeded} more hours for March 2026`} due="Due Apr 10" urgent={hoursNeeded > 0} />
-            <ActionItem icon="📄" text="Upload paystub for week of Mar 10–14" due="Due Apr 10" urgent />
-            <ActionItem icon="📋" text="Complete attestation for March activities" due="Due Apr 10" urgent={false} />
+            <ActionItem icon="⏱️" text={t('dash.reportHours', hoursNeeded)} due={t('dash.dueApr')} urgent={hoursNeeded > 0} />
+            <ActionItem icon="📄" text={t('dash.uploadPaystub')} due={t('dash.dueApr')} urgent />
+            <ActionItem icon="📋" text={t('dash.completeAttestation')} due={t('dash.dueApr')} urgent={false} />
             {processingDocs.length > 0 && (
-              <ActionItem icon="🔄" text={`${processingDocs.length} document(s) being processed`} due="No action needed" urgent={false} />
+              <ActionItem icon="🔄" text={t('dash.docsProcessing', processingDocs.length)} due={t('dash.noActionNeeded')} urgent={false} />
             )}
           </div>
           <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #F1F5F9' }}>
-            <h3 style={{ fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 10 }}>Required Documents for March</h3>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 10 }}>{t('dash.requiredDocsMarch')}</h3>
             {['Paystub / Wage Statement', 'Training Enrollment Letter'].map(doc => (
               <div key={doc} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#64748b', marginBottom: 6 }}>
                 <span>📎</span> {doc}
-                <button onClick={() => setPage('documents')} style={{ marginLeft: 'auto', fontSize: 11, color: '#196ECF', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Upload →</button>
+                <button onClick={() => setPage('documents')} style={{ marginLeft: 'auto', fontSize: 11, color: '#196ECF', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('dash.upload')}</button>
               </div>
             ))}
           </div>
@@ -127,8 +127,8 @@ export default function Dashboard({ setPage }) {
       {/* Recent notices */}
       <div style={{ background: '#fff', borderRadius: 12, padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677' }}>Recent Notices</h2>
-          <button onClick={() => setPage('notifications')} style={{ fontSize: 12, color: '#196ECF', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>View all →</button>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677' }}>{t('dash.recentNotices')}</h2>
+          <button onClick={() => setPage('notifications')} style={{ fontSize: 12, color: '#196ECF', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('dash.viewAll')}</button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {[...notifications].slice(0, 3).map(n => (

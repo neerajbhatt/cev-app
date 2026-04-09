@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useApp } from '../context/AppContext'
+import { useI18n } from '../i18n'
 
 const DOC_TYPES = ['CE Activity Proof', 'Exemption Documentation', 'Income Verification', 'Identity Documentation', 'Hardship Documentation', 'Training Enrollment Letter', 'Employer Verification Form', 'Appeals Related']
 
@@ -13,6 +14,7 @@ const STATUS_STYLE = {
 
 export default function Documents() {
   const { documents, addDocument, REQUIRED_DOCS } = useApp()
+  const { t } = useI18n()
   const [dragging, setDragging] = useState(false)
   const [form, setForm] = useState({ type: '', month: 'Mar 2026', notes: '' })
   const [preview, setPreview] = useState(null)
@@ -26,12 +28,12 @@ export default function Documents() {
     if (!file) return
     const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/heic', 'image/tiff']
     if (!allowed.includes(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png|heic|tiff)$/i)) {
-      setError('File type not supported. Please upload PDF, JPG, PNG, HEIC, or TIFF.')
+      setError(t('doc.typeNotSupported'))
       return
     }
     const maxMB = 25
     if (file.size > maxMB * 1024 * 1024) {
-      setError(`File size exceeds ${maxMB}MB limit.`)
+      setError(t('doc.sizeExceeds', maxMB))
       return
     }
     setError('')
@@ -45,8 +47,8 @@ export default function Documents() {
   }
 
   const handleUpload = async () => {
-    if (!preview) { setError('Please select a file.'); return }
-    if (!form.type) { setError('Please select a document type.'); return }
+    if (!preview) { setError(t('doc.selectFile')); return }
+    if (!form.type) { setError(t('doc.selectDocType')); return }
     setError('')
     setUploading(true)
     try {
@@ -60,7 +62,7 @@ export default function Documents() {
       setSuccess(true)
       setTimeout(() => setSuccess(false), 4000)
     } catch (err) {
-      setError(err.message || 'Upload failed. Please try again.')
+      setError(err.message || t('doc.uploadFailed'))
     } finally {
       setUploading(false)
     }
@@ -69,15 +71,15 @@ export default function Documents() {
   return (
     <div style={{ padding: '28px 32px', maxWidth: 900 }}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#002677' }}>Document Upload</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#002677' }}>{t('doc.title')}</h1>
         <p style={{ color: '#64748b', fontSize: 14, marginTop: 4 }}>
-          Upload supporting documents for your CE activities, exemptions, or other requirements. Documents are securely transmitted to the state DMS.
+          {t('doc.desc')}
         </p>
       </div>
 
       {/* Required docs reminder */}
       <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
-        <div style={{ fontWeight: 700, color: '#92400E', fontSize: 13, marginBottom: 8 }}>📋 Required Documents for March 2026</div>
+        <div style={{ fontWeight: 700, color: '#92400E', fontSize: 13, marginBottom: 8 }}>{t('doc.requiredFor')}</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {REQUIRED_DOCS.map(d => (
             <span key={d} style={{ background: '#fff', border: '1px solid #FDE68A', borderRadius: 6, padding: '4px 12px', fontSize: 12, color: '#78350F' }}>📎 {d}</span>
@@ -87,7 +89,7 @@ export default function Documents() {
 
       {/* Upload area */}
       <div style={{ background: '#fff', borderRadius: 12, padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 16 }}>Upload Document</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: '#002677', marginBottom: 16 }}>{t('doc.uploadTitle')}</h2>
 
         {/* Drop zone */}
         <div
@@ -114,31 +116,31 @@ export default function Documents() {
               <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
                 {preview.size > 1024 * 1024 ? `${(preview.size / 1024 / 1024).toFixed(1)} MB` : `${Math.round(preview.size / 1024)} KB`}
               </div>
-              <button onClick={e => { e.stopPropagation(); setPreview(null) }} style={{ marginTop: 10, background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>Remove</button>
+              <button onClick={e => { e.stopPropagation(); setPreview(null) }} style={{ marginTop: 10, background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: 6, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}>{t('act.remove')}</button>
             </>
           ) : (
             <>
               <div style={{ fontSize: 40, marginBottom: 10 }}>☁️</div>
-              <div style={{ fontWeight: 700, color: '#374151', fontSize: 14 }}>Drag & drop or click to select</div>
-              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 6 }}>PDF, JPG, PNG, HEIC, TIFF · Max 25 MB</div>
-              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>📱 Mobile photo capture supported</div>
+              <div style={{ fontWeight: 700, color: '#374151', fontSize: 14 }}>{t('doc.dragDrop')}</div>
+              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 6 }}>{t('doc.fileTypes')}</div>
+              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{t('doc.mobileCapture')}</div>
             </>
           )}
         </div>
 
-        {error && <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, padding: '8px 14px', fontSize: 13, color: '#B91C1C', marginBottom: 14 }}>⚠ {error}</div>}
+        {error && <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, padding: '8px 14px', fontSize: 13, color: '#B91C1C', marginBottom: 14 }}>{error}</div>}
 
         {/* Form fields */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
           <div>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 5 }}>Document Type *</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 5 }}>{t('doc.docType')}</label>
             <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: 8, fontSize: 14 }}>
-              <option value="">Select type...</option>
-              {DOC_TYPES.map(t => <option key={t}>{t}</option>)}
+              <option value="">{t('doc.selectType')}</option>
+              {DOC_TYPES.map(tp => <option key={tp}>{tp}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 5 }}>For Reporting Month</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 5 }}>{t('doc.forMonth')}</label>
             <select value={form.month} onChange={e => setForm(f => ({ ...f, month: e.target.value }))} style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: 8, fontSize: 14 }}>
               {['Mar 2026', 'Feb 2026', 'Jan 2026', 'Dec 2025'].map(m => <option key={m}>{m}</option>)}
             </select>
@@ -147,29 +149,29 @@ export default function Documents() {
 
         {success && (
           <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '10px 16px', fontSize: 13, color: '#166534', fontWeight: 600, marginBottom: 14 }}>
-            ✅ Document uploaded successfully! It is now being processed and will be sent to the state DMS.
+            {t('doc.success')}
           </div>
         )}
 
         <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#64748b', marginBottom: 16 }}>
-          🔒 Your document will be securely transmitted to the state Document Management System (DMS). The portal does not store document contents — only a reference record.
+          {t('doc.secureNote')}
         </div>
 
         <button onClick={handleUpload} disabled={uploading} style={{
           padding: '10px 28px', background: uploading ? '#94a3b8' : '#002677', color: '#fff',
           border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: uploading ? 'not-allowed' : 'pointer',
         }}>
-          {uploading ? '⏳ Uploading...' : '📤 Upload Document'}
+          {uploading ? t('doc.uploading') : t('doc.uploadBtn')}
         </button>
       </div>
 
       {/* Document list */}
       <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
         <div style={{ padding: '16px 24px', borderBottom: '1px solid #F1F5F9' }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#002677' }}>My Documents</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#002677' }}>{t('doc.myDocs')}</h3>
         </div>
         {documents.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No documents uploaded yet.</div>
+          <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>{t('doc.noDocs')}</div>
         ) : (
           documents.map(doc => {
             const s = STATUS_STYLE[doc.status] || STATUS_STYLE['Uploaded']
@@ -181,7 +183,7 @@ export default function Documents() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</div>
                   <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{doc.type} · {doc.month} · {doc.size}</div>
-                  <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>Uploaded {doc.uploadedAt}</div>
+                  <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{t('doc.uploaded')} {doc.uploadedAt}</div>
                 </div>
                 <span style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}`, borderRadius: 20, padding: '3px 12px', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
                   {s.icon} {doc.status}

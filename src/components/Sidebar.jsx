@@ -1,15 +1,17 @@
 import { useApp } from '../context/AppContext'
-
-const NAV = [
-  { id: 'dashboard',  icon: '🏠', label: 'Dashboard' },
-  { id: 'activity',   icon: '📅', label: 'Activity Reporting' },
-  { id: 'documents',  icon: '📄', label: 'Documents' },
-  { id: 'notifications', icon: '🔔', label: 'Notifications' },
-  { id: 'profile',    icon: '👤', label: 'My Account' },
-]
+import { useI18n } from '../i18n'
 
 export default function Sidebar({ page, setPage, onLogout }) {
   const { user, unreadCount } = useApp()
+  const { t } = useI18n()
+
+  const NAV = [
+    { id: 'dashboard',  icon: '🏠', label: t('nav.dashboard') },
+    { id: 'activity',   icon: '📅', label: t('nav.activity') },
+    { id: 'documents',  icon: '📄', label: t('nav.documents') },
+    { id: 'notifications', icon: '🔔', label: t('nav.notifications') },
+    { id: 'profile',    icon: '👤', label: t('nav.account') },
+  ]
 
   return (
     <aside style={{
@@ -25,8 +27,8 @@ export default function Sidebar({ page, setPage, onLogout }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 36, height: 36, background: '#FF6900', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>🏛️</div>
           <div>
-            <div style={{ color: '#fff', fontWeight: 700, fontSize: 13, lineHeight: 1.2 }}>State Benefits</div>
-            <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11 }}>CEV Portal</div>
+            <div style={{ color: '#fff', fontWeight: 700, fontSize: 13, lineHeight: 1.2 }}>{t('nav.stateBenefits')}</div>
+            <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11 }}>{t('nav.cevPortal')}</div>
           </div>
         </div>
       </div>
@@ -84,7 +86,7 @@ export default function Sidebar({ page, setPage, onLogout }) {
           borderRadius: 8, cursor: 'pointer', color: 'rgba(255,255,255,0.55)',
           fontSize: 13, textAlign: 'left',
         }}>
-          <span>🚪</span> Sign Out
+          <span>🚪</span> {t('nav.signOut')}
         </button>
       </div>
     </aside>
