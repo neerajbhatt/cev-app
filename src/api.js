@@ -42,4 +42,10 @@ export const api = {
   getDelegates:         ()                => req('GET',  '/api/delegates'),
   addDelegate:          (data)            => req('POST', '/api/delegates', data),
   removeDelegate:       (id)              => req('DELETE', `/api/delegates/${id}`),
+  changePassword:       (data)            => req('PUT',  '/api/user/change-password', data),
+  getMfa:               ()                => req('GET',  '/api/user/mfa'),
+  updateMfa:            (data)            => req('PUT',  '/api/user/mfa', data),
+  getLoginHistory:      ()                => req('GET',  '/api/user/login-history'),
+  getSessions:          ()                => req('GET',  '/api/user/sessions'),
+  revokeSession:        (id)              => req('DELETE', `/api/user/sessions/${id}`),
 }
